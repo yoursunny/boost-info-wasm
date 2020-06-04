@@ -1,0 +1,35 @@
+{
+  "private": true,
+  "name": "boost-info",
+  "version": "0.0.0",
+  "description": "Read Boost INFO file format via WebAssembly",
+  "author": "Junxiao Shi <npm@mail1.yoursunny.com>",
+  "license": "ISC",
+  "files": [
+    "main.d.ts",
+    "wasm-mod.js",
+    "wasm-mod.wasm"
+  ],
+  "type": "commonjs",
+  "main": "main.js",
+  "homepage": "https://github.com/yoursunny/boost-info-wasm",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yoursunny/boost-info-wasm.git"
+  },
+  "scripts": {
+    "build-ts": "tsc -b",
+    "build-wasm": "./build-wasm.sh",
+    "lint-cpp": "clang-format -i -style=Mozilla *.cpp",
+    "lint": "xo --fix",
+    "test": "ava"
+  },
+  "devDependencies": {
+    "ava": "^3.8.2",
+    "typescript": "^3.9.3",
+    "xo": "^0.32.0"
+  },
+  "xo": {
+    "space": 2
+  }
+}

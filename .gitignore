@@ -1,0 +1,8 @@
+.vscode/
+main.d.ts
+main.js
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+wasm-mod.js
+wasm-mod.wasm
