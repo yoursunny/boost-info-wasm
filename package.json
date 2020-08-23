@@ -1,7 +1,6 @@
 {
-  "private": true,
   "name": "boost-info",
-  "version": "0.0.0",
+  "version": "0.0.20200823",
   "description": "Read Boost INFO file format via WebAssembly",
   "author": "Junxiao Shi <npm@mail1.yoursunny.com>",
   "license": "ISC",
