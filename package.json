@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build-ts": "tsc -b",
-    "build-wasm": "./build-wasm.sh",
+    "build-wasm": "bash build-wasm.sh",
     "lint-cpp": "clang-format -i -style=Mozilla *.cpp",
     "lint": "xo --fix",
     "pnpm-install": "pnpm install --shamefully-hoist",
