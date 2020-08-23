@@ -26,6 +26,7 @@ test("debugSettings", async (t) => {
     t.is(node.value, expectedModuleValues[i]);
   });
   t.deepEqual(tree.map("debug.modules.module", (node) => node.value), expectedModuleValues);
+  tree.dispose();
 });
 
 test("typical", async (t) => {
@@ -45,6 +46,7 @@ test("typical", async (t) => {
   t.is(tree.get("key2.key3"), "value3");
   t.is(tree.get("key2.key3.key4"), "value4 with spaces");
   t.is(tree.get("key2.key5"), "value5");
+  tree.dispose();
 });
 
 test("complicated", async (t) => {
@@ -72,4 +74,5 @@ test("complicated", async (t) => {
   // \0 in key is not supported
   t.is(tree.get("key2.subkey.a_key_without_value"), "");
   t.deepEqual(tree.map("key2.subkey.", ({ value }) => value), ["value", ""]);
+  tree.dispose();
 });
