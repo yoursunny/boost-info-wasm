@@ -1,8 +1,8 @@
 // @ts-expect-error
-import openWasmModule = require('./wasm-mod.js');
+import openWasmModule = require("./wasm-mod.js");
 
-type TreePointer = number & { ctype: 'ptree*' };
-type CharPointer = number & { ctype: 'char*' };
+type TreePointer = number & { ctype: "ptree*" };
+type CharPointer = number & { ctype: "char*" };
 
 class Wrapper {
   public readonly load: (input: string) => TreePointer;
@@ -13,37 +13,37 @@ class Wrapper {
   public readonly free: (s: CharPointer) => void;
 
   constructor(private readonly m: any) {
-    this.load = m.cwrap('load', 'number', ['string']);
-    this.unload = m.cwrap('unload', 'void', ['number']);
-    this.count = m.cwrap('count', 'number', ['number', 'string', 'string']);
-    this.get = m.cwrap('get', 'number', ['number', 'string', 'string', 'number']);
-    this.value = m.cwrap('value', 'number', ['number']);
-    this.free = m.cwrap('free', 'void', ['number']);
+    this.load = m.cwrap("load", "number", ["string"]);
+    this.unload = m.cwrap("unload", "void", ["number"]);
+    this.count = m.cwrap("count", "number", ["number", "string", "string"]);
+    this.get = m.cwrap("get", "number", ["number", "string", "string", "number"]);
+    this.value = m.cwrap("value", "number", ["number"]);
+    this.free = m.cwrap("free", "void", ["number"]);
   }
 
   public getString(s: CharPointer): string {
-    // eslint-disable-next-line new-cap
     return this.m.UTF8ToString(s);
   }
 }
 
 /** Boost property tree node. */
 class Tree {
-  private constructor(private c: Wrapper, private readonly pointer: TreePointer) {
+  private constructor(private c: Wrapper|undefined, private readonly pointer: TreePointer) {
   }
 
   /** Load a Boost INFO file. */
-  static async create(input: string): Promise<Tree> {
+  public static async create(input: string): Promise<Tree> {
     const c = new Wrapper(await openWasmModule(undefined));
     return new Tree(c, c.load(input));
   }
 
   /** Release associated resources. */
-  public dispose() {
-    if (this.c) {
-      this.c.unload(this.pointer);
-      delete this.c;
+  public dispose(): void {
+    if (!this.c) {
+      return;
     }
+    this.c.unload(this.pointer);
+    delete this.c;
   }
 
   /** Read value at path. */
@@ -63,6 +63,10 @@ class Tree {
 
   /** Read value of this node. */
   public get value(): string|undefined {
+    if (!this.c) {
+      return undefined;
+    }
+
     const v = this.c.value(this.pointer);
     if (v === 0) {
       return undefined;
@@ -74,10 +78,14 @@ class Tree {
   }
 
   /** Visit nodes at given path. */
-  forEach(path: string, visitor: (node: Tree, index: number) => void): void {
-    const pathComps = path.split('.');
+  public forEach(path: string, visitor: (node: Tree, index: number) => void): void {
+    if (!this.c) {
+      return;
+    }
+
+    const pathComps = path.split(".");
     const key = pathComps.pop()!;
-    const parentPath = pathComps.join('.');
+    const parentPath = pathComps.join(".");
     const count = this.c.count(this.pointer, parentPath, key);
     for (let i = 0; i < count; ++i) {
       const subtree = new Tree(this.c, this.c.get(this.pointer, parentPath, key, i));
