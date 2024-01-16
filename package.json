@@ -11,6 +11,7 @@
   ],
   "type": "module",
   "main": "main.js",
+  "types": "main.d.ts",
   "sideEffects": false,
   "homepage": "https://github.com/yoursunny/boost-info-wasm",
   "repository": {
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@yoursunny/xo-config": "^0.56.1",
     "ava": "^6.0.1",
+    "type-fest": "^4.9.0",
     "typescript": "~5.3.3"
   }
 }

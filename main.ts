@@ -1,8 +1,12 @@
+import type { Tagged } from "type-fest";
+
 // @ts-expect-error type
 import openWasmModule from "./wasm-mod.js";
 
-type TreePointer = number & { ctype: "ptree*" };
-type CharPointer = number & { ctype: "char*" };
+type TreePointer = Tagged<number, "ptree*">;
+type CharPointer = Tagged<number, "char*">;
+
+const textDecoder = new TextDecoder();
 
 class Wrapper {
   public readonly load: (input: string) => TreePointer;
@@ -22,12 +26,14 @@ class Wrapper {
   }
 
   public getString(s: CharPointer): string {
-    return this.m.UTF8ToString(s);
+    const len = (this.m.HEAPU32 as Uint32Array).at(s / 4) ?? 0;
+    const ptr = s + 4;
+    return textDecoder.decode((this.m.HEAPU8 as Uint8Array).subarray(ptr, ptr + len));
   }
 }
 
 /** Boost property tree node. */
-class Tree {
+export class Tree {
   private constructor(private c: Wrapper | undefined, private readonly pointer: TreePointer) {}
 
   /** Load a Boost INFO file. */

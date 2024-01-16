@@ -27,6 +27,7 @@ count(pt::ptree* tree, const char* path, const char* key) {
   if (!child) {
     return 0;
   }
+
   return child->count(key);
 }
 
@@ -37,6 +38,7 @@ get(pt::ptree* tree, const char* path, const char* key, int index) {
   if (!child) {
     return nullptr;
   }
+
   auto range = child->equal_range(key);
   int i = -1;
   for (auto it = range.first; it != range.second; ++it) {
@@ -53,7 +55,10 @@ EMSCRIPTEN_KEEPALIVE
 extern "C" const char*
 value(pt::ptree* tree) {
   std::string s = tree->data();
-  char* copy = reinterpret_cast<char*>(malloc(1 + s.size()));
-  memcpy(copy, s.data(), 1 + s.size());
-  return copy;
+  uint32_t len = static_cast<uint32_t>(s.size());
+
+  char* room = reinterpret_cast<char*>(malloc(sizeof(len) + s.size()));
+  memcpy(room, &len, sizeof(len));
+  memcpy(room + sizeof(len), s.data(), len);
+  return room;
 }

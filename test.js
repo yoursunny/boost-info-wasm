@@ -1,3 +1,5 @@
+// @ts-check
+
 import test from "ava";
 
 import * as BoostInfo from "./main.js";
@@ -7,23 +9,26 @@ test("debugSettings", async (t) => {
   const tree = await BoostInfo.load(`
     debug
     {
-        filename debug.log
-        modules
-        {
-            module Finance
-            module Admin
-            module HR
-        }
-        level 2
+      filename debug.log
+      modules
+      {
+        module Finance
+        module Admin
+        module HR
+      }
+      level 2
     }
   `);
   t.is(tree.get("debug.filename"), "debug.log");
   t.is(tree.get("debug.level"), "2");
   const expectedModuleValues = ["Finance", "Admin", "HR"];
+  let n = 0;
   tree.forEach("debug.modules.module", (node, i) => {
     t.is(node.get(), expectedModuleValues[i]);
     t.is(node.value, expectedModuleValues[i]);
+    ++n;
   });
+  t.is(n, expectedModuleValues.length);
   t.deepEqual(tree.map("debug.modules.module", (node) => node.value), expectedModuleValues);
   tree.dispose();
 });
@@ -36,7 +41,7 @@ test("typical", async (t) => {
     {
       key3 value3
       {
-          key4 "value4 with spaces"
+        key4 "value4 with spaces"
       }
       key5 value5
     }
@@ -59,16 +64,16 @@ test("complicated", async (t) => {
               "over three"\\
               "lines"
       {
-          a_key_without_value ""
-          "a key with special characters in it {};#\\n\\t\\"\\0" ""
-          "" value    ; Empty key with a value
-          "" ""       ; Empty key with empty value!
+        a_key_without_value ""
+        "a key with special characters in it {};#\\n\\t\\"\\0" ""
+        "" value    ; Empty key with a value
+        "" ""       ; Empty key with empty value!
       }
     }
   `);
   t.is(tree.get("undefined"), undefined);
   t.is(tree.get("key1"), "value1");
-  t.is(tree.get("key2"), "value with special characters in it {};#\n\t\""); // \0 is lost
+  t.is(tree.get("key2"), "value with special characters in it {};#\n\t\"\0");
   t.is(tree.get("key2.subkey"), "value split over threelines");
   // \0 in key is not supported
   t.is(tree.get("key2.subkey.a_key_without_value"), "");
