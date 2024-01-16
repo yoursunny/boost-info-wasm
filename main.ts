@@ -4,31 +4,44 @@ import type { Tagged } from "type-fest";
 import openWasmModule from "./wasm-mod.js";
 
 type TreePointer = Tagged<number, "ptree*">;
-type CharPointer = Tagged<number, "char*">;
+type LengthStringPointer = Tagged<number, "uint32+char*">;
 
 const textDecoder = new TextDecoder();
 
+export enum Format {
+  INFO = 0,
+  XML = 1,
+}
+
 class Wrapper {
-  public readonly load: (input: string) => TreePointer;
-  public readonly unload: (tree: TreePointer) => void;
+  public readonly load: (input: string, fmt: Format) => TreePointer;
+  public readonly save: (tree: TreePointer, fmt: Format) => LengthStringPointer;
+  public readonly dispose: (tree: TreePointer) => void;
   public readonly count: (tree: TreePointer, path: string, key: string) => number;
   public readonly get: (tree: TreePointer, path: string, key: string, index: number) => TreePointer;
-  public readonly value: (tree: TreePointer) => CharPointer;
-  public readonly free: (s: CharPointer) => void;
+  public readonly value: (tree: TreePointer) => LengthStringPointer;
+  public readonly free: (s: LengthStringPointer) => void;
 
   constructor(private readonly m: any) {
-    this.load = m.cwrap("load", "number", ["string"]);
-    this.unload = m.cwrap("unload", "void", ["number"]);
+    this.load = m.cwrap("load", "number", ["string", "number"]);
+    this.save = m.cwrap("save", "number", ["number", "number"]);
+    this.dispose = m.cwrap("dispose", "void", ["number"]);
     this.count = m.cwrap("count", "number", ["number", "string", "string"]);
     this.get = m.cwrap("get", "number", ["number", "string", "string", "number"]);
     this.value = m.cwrap("value", "number", ["number"]);
     this.free = m.cwrap("free", "void", ["number"]);
   }
 
-  public getString(s: CharPointer): string {
-    const len = (this.m.HEAPU32 as Uint32Array).at(s / 4) ?? 0;
-    const ptr = s + 4;
-    return textDecoder.decode((this.m.HEAPU8 as Uint8Array).subarray(ptr, ptr + len));
+  public getString(ptr: LengthStringPointer, free = true): string | undefined {
+    if (ptr === 0) {
+      return undefined;
+    }
+    const len = (this.m.HEAPU32 as Uint32Array).at(ptr / 4) ?? 0;
+    const s = textDecoder.decode((this.m.HEAPU8 as Uint8Array).subarray(ptr + 4, ptr + 4 + len));
+    if (free) {
+      this.free(ptr);
+    }
+    return s;
   }
 }
 
@@ -36,10 +49,18 @@ class Wrapper {
 export class Tree {
   private constructor(private c: Wrapper | undefined, private readonly pointer: TreePointer) {}
 
-  /** Load a Boost INFO file. */
-  public static async create(input: string): Promise<Tree> {
+  /** Load from string. */
+  public static async create(input: string, fmt = Format.INFO): Promise<Tree> {
     const c = new Wrapper(await openWasmModule(undefined));
-    return new Tree(c, c.load(input));
+    return new Tree(c, c.load(input, fmt));
+  }
+
+  /** Save to string. */
+  public save(fmt = Format.INFO): string | undefined {
+    if (!this.c) {
+      return undefined;
+    }
+    return this.c.getString(this.c.save(this.pointer, fmt));
   }
 
   /** Release associated resources. */
@@ -47,7 +68,7 @@ export class Tree {
     if (!this.c) {
       return;
     }
-    this.c.unload(this.pointer);
+    this.c.dispose(this.pointer);
     delete this.c;
   }
 
@@ -71,15 +92,7 @@ export class Tree {
     if (!this.c) {
       return undefined;
     }
-
-    const v = this.c.value(this.pointer);
-    if (v === 0) {
-      return undefined;
-    }
-
-    const s = this.c.getString(v);
-    this.c.free(v);
-    return s;
+    return this.c.getString(this.c.value(this.pointer));
   }
 
   /** Visit nodes at given path. */

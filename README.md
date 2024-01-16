@@ -8,6 +8,7 @@ Features:
 * Load Boost INFO format from a string.
 * Read value at given path.
 * Visit nodes at given path.
+* Convert between Boost INFO and XML.
 
 The implementation runs Boost C++ code in a WebAssembly module, so that it supports almost all features of Boost INFO file format.
 It does not support keys that contain `.` or `\0` characters.
