@@ -1,10 +1,11 @@
 // @ts-check
 
-import test from "ava";
+import assert from "node:assert/strict";
+import { test } from "node:test";
 
 import * as BoostInfo from "./main.js";
 
-test("debugSettings", async (t) => {
+test("debugSettings", async () => {
   // https://www.boost.org/doc/libs/1_73_0/doc/html/property_tree/tutorial.html
   const tree = await BoostInfo.load(`
     debug
@@ -19,21 +20,21 @@ test("debugSettings", async (t) => {
       level 2
     }
   `);
-  t.is(tree.get("debug.filename"), "debug.log");
-  t.is(tree.get("debug.level"), "2");
+  assert.equal(tree.get("debug.filename"), "debug.log");
+  assert.equal(tree.get("debug.level"), "2");
   const expectedModuleValues = ["Finance", "Admin", "HR"];
   let n = 0;
   tree.forEach("debug.modules.module", (node, i) => {
-    t.is(node.get(), expectedModuleValues[i]);
-    t.is(node.value, expectedModuleValues[i]);
+    assert.equal(node.get(), expectedModuleValues[i]);
+    assert.equal(node.value, expectedModuleValues[i]);
     ++n;
   });
-  t.is(n, expectedModuleValues.length);
-  t.deepEqual(tree.map("debug.modules.module", (node) => node.value), expectedModuleValues);
+  assert.equal(n, expectedModuleValues.length);
+  assert.deepEqual(tree.map("debug.modules.module", (node) => node.value), expectedModuleValues);
   tree.dispose();
 });
 
-test("typical", async (t) => {
+test("typical", async () => {
   // https://www.boost.org/doc/libs/1_73_0/doc/html/property_tree/parsers.html#property_tree.parsers.info_parser
   const tree = await BoostInfo.load(`
     key1 value1
@@ -46,14 +47,14 @@ test("typical", async (t) => {
       key5 value5
     }
   `);
-  t.is(tree.get("key1"), "value1");
-  t.is(tree.get("key2.key3"), "value3");
-  t.is(tree.get("key2.key3.key4"), "value4 with spaces");
-  t.is(tree.get("key2.key5"), "value5");
+  assert.equal(tree.get("key1"), "value1");
+  assert.equal(tree.get("key2.key3"), "value3");
+  assert.equal(tree.get("key2.key3.key4"), "value4 with spaces");
+  assert.equal(tree.get("key2.key5"), "value5");
   tree.dispose();
 });
 
-test("complicated", async (t) => {
+test("complicated", async () => {
   // https://www.boost.org/doc/libs/1_73_0/doc/html/property_tree/parsers.html#property_tree.parsers.info_parser
   const tree = await BoostInfo.load(`
     ; A comment
@@ -71,12 +72,12 @@ test("complicated", async (t) => {
       }
     }
   `);
-  t.is(tree.get("undefined"), undefined);
-  t.is(tree.get("key1"), "value1");
-  t.is(tree.get("key2"), "value with special characters in it {};#\n\t\"\0");
-  t.is(tree.get("key2.subkey"), "value split over threelines");
+  assert.equal(tree.get("undefined"), undefined);
+  assert.equal(tree.get("key1"), "value1");
+  assert.equal(tree.get("key2"), "value with special characters in it {};#\n\t\"\0");
+  assert.equal(tree.get("key2.subkey"), "value split over threelines");
   // \0 in key is not supported
-  t.is(tree.get("key2.subkey.a_key_without_value"), "");
-  t.deepEqual(tree.map("key2.subkey.", ({ value }) => value), ["value", ""]);
+  assert.equal(tree.get("key2.subkey.a_key_without_value"), "");
+  assert.deepEqual(tree.map("key2.subkey.", ({ value }) => value), ["value", ""]);
   tree.dispose();
 });

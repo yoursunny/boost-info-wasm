@@ -24,12 +24,11 @@
     "clang-format": "clang-format-15 -i -style=file *.cpp",
     "lint": "xo-yoursunny --fix",
     "shfmt": "docker run --rm -u $(id -u):$(id -g) -v $PWD:/mnt -w /mnt mvdan/shfmt:v3 -l -w -s -i=2 -ci *.sh",
-    "test": "ava test.js"
+    "test": "node --test test.js"
   },
   "packageManager": "pnpm@8.14.1",
   "devDependencies": {
     "@yoursunny/xo-config": "^0.56.1",
-    "ava": "^6.0.1",
     "type-fest": "^4.9.0",
     "typescript": "~5.3.3"
   }
