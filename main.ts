@@ -1,5 +1,5 @@
-// @ts-expect-error
-import openWasmModule = require("./wasm-mod.js");
+// @ts-expect-error type
+import openWasmModule from "./wasm-mod.js";
 
 type TreePointer = number & { ctype: "ptree*" };
 type CharPointer = number & { ctype: "char*" };
@@ -28,8 +28,7 @@ class Wrapper {
 
 /** Boost property tree node. */
 class Tree {
-  private constructor(private c: Wrapper|undefined, private readonly pointer: TreePointer) {
-  }
+  private constructor(private c: Wrapper | undefined, private readonly pointer: TreePointer) {}
 
   /** Load a Boost INFO file. */
   public static async create(input: string): Promise<Tree> {
@@ -47,12 +46,12 @@ class Tree {
   }
 
   /** Read value at path. */
-  public get(path?: string): string|undefined {
+  public get(path?: string): string | undefined {
     if (!path) {
       return this.value;
     }
 
-    let v: string|undefined;
+    let v: string | undefined;
     this.forEach(path, (subtree, i) => {
       if (i === 0) {
         v = subtree.value;
@@ -62,7 +61,7 @@ class Tree {
   }
 
   /** Read value of this node. */
-  public get value(): string|undefined {
+  public get value(): string | undefined {
     if (!this.c) {
       return undefined;
     }

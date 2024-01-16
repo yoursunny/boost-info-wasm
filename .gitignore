@@ -1,8 +1,8 @@
-.vscode/
-main.d.ts
-main.js
+/.vscode/
+/emsdk-cache
+/main.d.ts
+/main.js
+/pnpm-lock.yaml
+/wasm-mod.js
+/wasm-mod.wasm
 node_modules/
-package-lock.json
-pnpm-lock.yaml
-wasm-mod.js
-wasm-mod.wasm

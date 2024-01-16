@@ -7,8 +7,7 @@ namespace pt = boost::property_tree;
 
 EMSCRIPTEN_KEEPALIVE
 extern "C" pt::ptree*
-load(const char* input)
-{
+load(const char* input) {
   std::istringstream stream(input);
   auto* tree = new pt::ptree;
   pt::info_parser::read_info(stream, *tree, pt::ptree());
@@ -17,15 +16,13 @@ load(const char* input)
 
 EMSCRIPTEN_KEEPALIVE
 extern "C" void
-unload(pt::ptree* tree)
-{
+unload(pt::ptree* tree) {
   delete tree;
 }
 
 EMSCRIPTEN_KEEPALIVE
 extern "C" int
-count(pt::ptree* tree, const char* path, const char* key)
-{
+count(pt::ptree* tree, const char* path, const char* key) {
   auto child = tree->get_child_optional(path);
   if (!child) {
     return 0;
@@ -35,8 +32,7 @@ count(pt::ptree* tree, const char* path, const char* key)
 
 EMSCRIPTEN_KEEPALIVE
 extern "C" pt::ptree*
-get(pt::ptree* tree, const char* path, const char* key, int index)
-{
+get(pt::ptree* tree, const char* path, const char* key, int index) {
   auto child = tree->get_child_optional(path);
   if (!child) {
     return nullptr;
@@ -55,8 +51,7 @@ get(pt::ptree* tree, const char* path, const char* key, int index)
 
 EMSCRIPTEN_KEEPALIVE
 extern "C" const char*
-value(pt::ptree* tree)
-{
+value(pt::ptree* tree) {
   std::string s = tree->data();
   char* copy = reinterpret_cast<char*>(malloc(1 + s.size()));
   memcpy(copy, s.data(), 1 + s.size());

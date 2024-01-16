@@ -1,7 +1,6 @@
-// @ts-check
+import test from "ava";
 
-const test = require("ava").default;
-const BoostInfo = require(".");
+import * as BoostInfo from "./main.js";
 
 test("debugSettings", async (t) => {
   // https://www.boost.org/doc/libs/1_73_0/doc/html/property_tree/tutorial.html
