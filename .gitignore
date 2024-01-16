@@ -1,4 +1,5 @@
 /.vscode/
+/*.tgz
 /emsdk-cache
 /main.d.ts
 /main.js
